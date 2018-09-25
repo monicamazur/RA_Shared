@@ -7,3 +7,10 @@ print(np.average(a))
 
 print(plt.plot(a))
 plt.show()
+
+
+class Generator(object):
+    def __init__(self, params, shapes, n_steps):
+        self.params = params
+        self.shapes = shapes
+        self.curve = calc_curve(n_steps)
