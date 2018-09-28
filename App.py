@@ -77,25 +77,34 @@ def calc_curve(shapes, params, n_steps):
     indiv_curves = [calc_one_curve(shp, params[shp], n_steps) for shp in shapes]
 
     # calculate transition weight for n_step (blue)
-    w = NotImplemented  # todo : calculate the weight from params['weight']
+    w = calc_weight(params['weight'], n_steps)
 
     # return shape1 * weight + shape2*(1-weight)  # orange
     return indiv_curves[0] * w + indiv_curves[1] * (1-w)
 
-def calc_one_curve(shp, prms, n_steps):
+def calc_weight(params, n_steps):
+    x = np.arange(n_steps)
+    w = logistic(x=x,a=1, b=params['b'], c=params['c'])
+    return w
+
+def calc_one_curve(shp, params, n_steps):
     x = np.arange(n_steps)
     if shp == 'linear':
-        return linear(x=x, a=prms['a'], b=['b'])
+        return linear(x=x, a=params['a'], b=params['b'])
     elif shp == 'exponential':
-        raise NotImplementedError  # todo: implement all other basic shapes
+        return exponential(x=x, a=params['a'], b=params['b'])
+    elif shp == 'logistic':
+        return logistic(x=x, a=params['a'], b=params['b'], c=params['c'])
+    elif shp == 'inverse':
+        return inverse(x=x, a=params['a'], b=params['b'])
+    elif shp == 'log':
+        return log(x=x, a=params['a'], b=params['b'])
+    elif shp == 'ocilación':
+        return ocilación(x=x, a=params['a'], b=params['b'], c=params['c'])
+    elif shp == 'ocilación_aten':
+        return ocilación_aten(x=x, a=params['a'], b=params['b'], c=params['c'], d=params['d'])
     else:
         raise ValueError('Check your spelling for "{}"! :)'.format(shp))
-
-# curve = self.plt.plot(np.linspace(0, 1, n_steps), wtd)
-# plt.xlabel(‘Time (months)’)
-# plt.ylabel(‘wtd (m)’)
-# plt.title(“Plot”)
-
 
 def linear(x, a, b):
     return a*x + b

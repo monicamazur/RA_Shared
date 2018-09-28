@@ -3,10 +3,10 @@ from try_opt import OptimiseGuesser
 from try_spotpy import SpotPyGuesser
 
 params = {
-    'logistic': {},
-    'exponential': {},
-    'weight': {}
-}  # todo: add actual parameter values
+    'logistic': {'a':-2.9, 'b':-0.9, 'c':0},
+    'exponential': {'a':-0.2,'b':0.8},
+    'weight': {'b':-0.8,'c':-5.8}
+}
 
 gen = Generator(params=params, n_steps=30)
 
