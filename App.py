@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import spotpy
 
 
 class Generator(object):
@@ -28,6 +29,84 @@ class GuesserTemplate():
         raise NotImplementedError
         # guess the curve parameters and save them, in same structure as "params" from Generator, in self.params
 
+        # IMPLEMENT Scipy Optimize
+        for shp in self.params:
+        scipy.optimize.minimize(self, self.params[shp], args=(), method='BFGS', jac=None, tol=None, callback=None,
+                                options={'gtol': 1e-05, 'norm': inf, 'eps': 1.4901161193847656e-08, 'maxiter': None,
+                                         'disp': False, 'return_all': False})
+
+        #IMPLEMENT MAXIMUM LIKELIHOOD ESTIMATION ALGORITHM
+
+        class mle(_algorithm):
+
+        def __init__(self, spot_setup, dbname=None, dbformat=None, parallel='seq', save_sim=True,
+                     save_threshold=-np.inf,
+                     sim_timeout=None):
+            if parallel != 'seq':
+                raise Exception('ERROR: Please set parallel=seq as MLE is only useable in sequetial mode')
+
+            _algorithm.__init__(self, spot_setup, dbname=params,
+                                dbformat=dbformat, parallel=parallel, save_sim=save_sim, save_threshold=save_threshold,
+                                sim_timeout=sim_timeout)
+
+        def check_par_validity(self, params):
+            if len(par) == len(self.min_bound) and len(params.shp) == len(self.max_bound):
+                for i in range(len(self.params[shp]):
+                    if params[i] < self.min_bound[i]:
+                       params[i = self.min_bound[i]
+                    if params[i  > self.max_bound[i]:
+                       params[i] = self.max_bound[i]
+            else:
+                print('ERROR Bounds have not the same lengths as Parameterarray')
+            return par
+
+        def sample(self, repetitions):
+            print('Starting the MLE algotrithm with ' + str(repetitions) + ' repetitions...')
+            self.set_repetiton(repetitions)
+            # Define stepsize of MLE
+            stepsizes = self.parameter()['step']  # array of stepsizes
+            accepted = 0.0
+            self.min_bound, self.max_bound = self.parameter()['minbound'], self.parameter()['maxbound']
+            # Metropolis-Hastings iterations.
+            burnIn = int(repetitions / 10)
+            likes = []
+            pars = []
+            sims = []
+            print('burnIn...')
+            for i in range(burnIn):
+                randompar = self.parameter()['random']
+                pars.append(randompar)
+                _, _, simulations = self.simulate((i, randompar))
+                sims.append(simulations)
+                like = self.postprocessing(i, randompar, simulations)
+                likes.append(like)
+
+            old_like = max(likes)
+            old_par = pars[likes.index(old_like)]
+            # old_simulations = sims[likes.index(old_like)]
+            print('Begin Random Walk')
+            for rep in range(repetitions - burnIn):
+                # Suggest new candidate from Gaussian proposal distribution.
+                # Use stepsize provided for every dimension.
+                new_par = np.random.normal(loc=old_par, scale=stepsizes)
+                new_par = self.check_par_validity(new_par)
+                _, _, new_simulations = self.simulate((i, new_par))
+                new_like = self.postprocessing(rep + burnIn, new_par, new_simulations)
+                # Accept new candidate in Monte-Carlo fashing.
+                if (new_like > old_like):
+                    accepted = accepted + 1.0  # monitor acceptance
+                    old_par = new_par
+                    # old_simulations = new_simulations
+                    old_like = new_like
+                    self.status(rep, new_like, new_par)
+
+            self.final_call()
+
+        #FAST Sensitivity analysis??
+        sampler = spotpy.algorithms.fast(spotpy_setup, () dbname = 'Fast_sensitivity', dbformat = 'csv')
+        results = sampler.get_data()
+        analyser.plot_fast_sensitivity(results, number_of_sensitiv_pars=len(self.params[shp])
+)
 
     def gof(self, measure='aic'):
         if self.params is None:
