@@ -12,6 +12,7 @@ gen = Generator(params=params, n_steps=30)
 
 print('Congratulations! You got past this line. Now go calibrate.')
 
+
 print('Optimise\n==========')
 opt = OptimiseGuesser(gen)
 opt.estimate()
