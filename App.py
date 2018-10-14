@@ -1,6 +1,4 @@
-import matplotlib.pyplot as plt
 import numpy as np
-
 
 
 class Generator(object):
@@ -13,7 +11,7 @@ class Generator(object):
         self.curve = calc_curve(shapes, params, n_steps)
 
 
-class GuesserTemplate():
+class GuesserTemplate(object):
     def __init__(self, generator):
         """
 
@@ -23,24 +21,25 @@ class GuesserTemplate():
         # save reference to GenCurve object
         self.gen = generator
 
-        self.params = None
+        self.params = {}
 
-    def estimate(self):
+    def estimate(self, method=None):
         raise NotImplementedError
-        # guess the curve parameters and save them, in same structure as "params" from Generator, in self.params
-
 
     def gof(self, measure='aic'):
         if self.params is None:
             raise ValueError('You need to call estimate() first!')
 
         # returning a goodness of fit estimate for the fitted parameters
+        return self._gof(params=self.params, measure=measure)
+
+    def _gof(self, params, measure):
         gen = self.gen
-        estim = calc_curve(gen.shapes, params=self.params, n_steps=len(gen.curve))
+        estim = calc_curve(gen.shapes, params=params, n_steps=len(gen.curve))
         truth = gen.curve
         n_params = 0
-        for shp in self.params:
-            n_params += len(self.params[shp])
+        for shp in params:
+            n_params += len(params[shp])
 
         return calc_gof(n_params, estim, truth, measure=measure)
 
@@ -55,17 +54,19 @@ class GuesserTemplate():
             check[shp] = {}
             for prm, true_val in d_true.items():
                 estim_val = estim_params[shp][prm]
-                check[shp][prm] = (estim_val - true_val)/true_val
+                check[shp][prm] = (estim_val - true_val) / true_val
 
         return check
 
+    def n_params(self):
+        return sum([len(d) for d in self.gen.params.values()])
+
 
 def calc_gof(n_params, estim, truth, measure):
-
     if measure == 'aic':
-        sse = np.sum((truth-estim)**2)
+        sse = np.sum((truth - estim) ** 2)
         n = len(truth)
-        gof = 2*n_params - n*np.log(np.exp(2*np.pi*sse/n)+1)
+        gof = 2 * n_params - n * np.log(np.exp(2 * np.pi * sse / n) + 1)
 
     else:
         raise ValueError(measure)
@@ -81,12 +82,14 @@ def calc_curve(shapes, params, n_steps):
     w = calc_weight(params['weight'], n_steps)
 
     # return shape1 * weight + shape2*(1-weight)  # orange
-    return indiv_curves[0] * w + indiv_curves[1] * (1-w)
+    return indiv_curves[0] * w + indiv_curves[1] * (1 - w)
+
 
 def calc_weight(params, n_steps):
     x = np.arange(n_steps)
-    w = logistic(x=x,a=1, b=params['b'], c=params['c'])
+    w = logistic(x=x, a=1, b=params['b'], c=params['c'])
     return w
+
 
 def calc_one_curve(shp, params, n_steps):
     x = np.arange(n_steps)
@@ -107,26 +110,41 @@ def calc_one_curve(shp, params, n_steps):
     else:
         raise ValueError('Check your spelling for "{}"! :)'.format(shp))
 
+
 def linear(x, a, b):
-    return a*x + b
+    return a * x + b
+
 
 def exponential(x, a, b):
     return a * (b ** x)
 
+
 def logistic(x, a, b, c):
     return a / (1 + np.exp(-b * x + c))
 
+
 def inverse(x, a, b):
-    return a/(x + b)
+    return a / (x + b)
+
 
 def log(x, a, b):
     return a * np.log(x + b)
 
+
 def ocilación(x, a, b, c):
     return a * np.sin(b * x + c)
+
 
 def ocilación_aten(x, a, b, c, d):
     return np.exp(a * x) * b * np.sin(c * x + d)
 
 
-
+def prm_mtrx_to_dict(mtrx, d_params):
+    # Map matrix values to parameter dictionary for _gof() call
+    i = 0
+    d_out = {shp: {} for shp in d_params}
+    for shp, d_shp in d_params.items():
+        for prm in d_shp:
+            d_out[shp][prm] = mtrx[i]
+            i += 1
+    return d_out

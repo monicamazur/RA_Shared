@@ -6,9 +6,13 @@ class SpotPyGuesser(GuesserTemplate):
         self.method = method
         super().__init__(generator)
 
-    def estimate(self):
+    def estimate(self, method=None):
         # guess the curve parameters and save them, in same structure as "params" from Generator, in self.params
         # access the spotpy method with self.method
+
+        if method is None:
+            method = 'mle'
+
         raise NotImplementedError
 
         self.params = [spotpy.parameter.list('x',[2, 4, 6, 8, 10, 12, 14, 16, 18, 20]),
