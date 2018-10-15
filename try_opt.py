@@ -1,51 +1,39 @@
-from App import GuesserTemplate
+import numpy as np
+from scipy import optimize
 
-    import scipy
+from App import GuesserTemplate, prm_mtrx_to_dict
+
 
 class OptimiseGuesser(GuesserTemplate):
-    def estimate(self):
+
+    def estimate(self, method=None):
         # guess the curve parameters and save them, in same structure as "params" from Generator, in self.params
-        raise NotImplementedError
 
-        #create a dictionary for parameter limits with tuples
+        # IMPLEMENT Scipy Optimize
+        # This cannot be done in a for-loop. You have to optimise all parameters at the same time! :)
 
-        lims_params = {
-        'logistic': {'a':(,), 'b':(,), 'c':(,)},
-        'exponential': {'a':(,),'b':(,)},
-        }
+        # I will implement this for a general case with fixed starting guesses as an example.
 
-        _methods_opt = {
-            'Nelder-Mead': ,
-            'Powell':
-            'CG': ,
-            'BFGS': ,
-            'Newton-CG': ,
-            'L-BFGS-B': ,
-            'TNC': ,
-            'COBYLA': ,
-            'SLSQP': ,
-            'trust-constr': ,
-            'dogleg': ,
-            'trust-exact':,
-            'trust-krylov':,
-        }
+        # todo: implement this with different numbers of starting guesses to find out which one is best.
+        # todo: (cont.) because the current example only uses 1 starting guess
 
+        # This function will calculate the goodness of fit of a chosen parameter set p
+        def f(p):
+            return self._gof(params=prm_mtrx_to_dict(p, self.gen.params), measure='aic')
 
-        #start the minimize function at different points
-        _x_guess = [2, 4, 6, 8, 10, 12, 14, 16, 18, 20]
-        _y_guess = [1, 0.5, 2, 0.25, 4, 6, 2, 4, 1, 2]
+        # here I am starting all parameter guesses at 0. Try to loop over different start values
+        x0 = np.zeros(self.n_params())
 
-        # or generate initial estimates by following the Tinamit example ?
+        best_fit_params = optimize.minimize(f, x0, method=method)['x']
 
-        #optimize using all methods
+        # Todo: **please understand very carefully here how I have used SciPy's function (without copying anything
+        # todo: from SciPy internal entrails) and how each argument of the single call to a SciPy function corresponds
+        # todo: to what the SciPy documentation asks for (function, matrix of arguments to optimise, and method).
 
-        for x in _x_guess and for y in _y_guess
+        self.params.clear()
+        self.params.update(prm_mtrx_to_dict(best_fit_params, self.gen.params))
 
-        opt = minimize(self,[x,y], bounds= [lims_params[p] for p in params], method='BFGS')
-        #if the syntax in opt is correct, copy for theh other methods
-
-        #save in same structure as "params" from Generator, in self.params
-        return {p: {'val': opt.x[i]}} for i, p in enumerate(params)}
-
-
-
+        # todo: note that the current optimisation is *not* working! (as expected)
+        # todo: 1) Write a function to normalise the input data, and try to set reasonable bounds for all
+        # todo: (cont.) shp parameters for a normalised input data case
+        # todo: 2) Then try implementing different starting points and different optimisation algorithms

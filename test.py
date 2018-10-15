@@ -14,10 +14,26 @@ print('Congratulations! You got past this line. Now go calibrate.')
 
 
 print('Optimise\n==========')
-opt = OptimiseGuesser(gen)  # todo: loop over all optimisation algorithms and find the best one
-opt.estimate()
-print(opt.gof())
-print(opt.check_params())
+_methods_opt = {
+    'Nelder-Mead',
+    'Powell',
+    'CG',
+    'BFGS',
+    'Newton-CG',
+    'L-BFGS-B',
+    'TNC',
+    'COBYLA',
+    'SLSQP',
+    'trust-constr',
+    'dogleg',
+    'trust-exact',
+    'trust-krylov'
+}
+opt = OptimiseGuesser(gen)  # done: loop over all optimisation algorithms and find the best one
+for m in _methods_opt:
+    opt.estimate(method=m)
+    print(opt.gof())
+    print(opt.check_params())
 
 print('SPOTPY\n==========')
 sptpy = SpotPyGuesser(gen, method='abc')  # todo: loop over all spotpy methods and find the best one
