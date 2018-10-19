@@ -12,6 +12,17 @@ gen = Generator(params=params, n_steps=30)
 
 print('Congratulations! You got past this line. Now go calibrate.')
 
+bounds_params = {
+    'linear': {'a': (-10, 10), 'b': (-20, 20)},
+    'exponential': {'a': (1, 10), 'b': (-1, 1)},
+    'logistic': {'a': (-10, 10), 'b': (-10, 10), 'c': (-20, 20)},
+    'inverse': {'a': (-40, 40), 'b': (0, 20)},
+    'log': {'a': (-20, 20), 'b': (-20, 20)},
+    'ocilacion': {'a': (-10, 10), 'b': (-5, 5), 'c': (0, np.pi)},
+    'ocilacion_aten': {'a': (-1 / 2, 1 / 2), 'b': (-10, 10), 'c': (-2, 2), 'd': (0, np.pi)},
+    'weight': {'b': (-10, 10), 'c': (-10, 10)},
+}
+
 
 print('Optimise\n==========')
 _methods_opt = {
