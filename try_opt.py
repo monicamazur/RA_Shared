@@ -1,8 +1,18 @@
 import numpy as np
 from scipy import optimize
-import random
+
 from App import GuesserTemplate, prm_mtrx_to_dict
-from test import bounds_params
+
+bounds_params = {
+    'linear': {'a': (-10, 10), 'b': (-20, 20)},
+    'exponential': {'a': (1, 10), 'b': (-1, 1)},
+    'logistic': {'a': (-10, 10), 'b': (-10, 10), 'c': (-20, 20)},
+    'inverse': {'a': (-40, 40), 'b': (0, 20)},
+    'log': {'a': (-20, 20), 'b': (-20, 20)},
+    'ocilacion': {'a': (-10, 10), 'b': (-5, 5), 'c': (0, np.pi)},
+    'ocilacion_aten': {'a': (-1 / 2, 1 / 2), 'b': (-10, 10), 'c': (-2, 2), 'd': (0, np.pi)},
+    'weight': {'b': (-10, 10), 'c': (-10, 10)},
+}
 
 
 class OptimiseGuesser(GuesserTemplate):
@@ -27,21 +37,25 @@ class OptimiseGuesser(GuesserTemplate):
             return self._gof(params=prm_mtrx_to_dict(p, self.gen.params), measure='aic')
 
         # Normalize data
-        # np.var(f) / np.mean(f)
 
         # here I am starting all parameter guesses at 0. Try to loop over different start values
         ntries = 10
         x0s = np.zeros((ntries, self.n_params()))
 
         # randomly generate 10 initial guesses between upper and low parameter bounds
+        bounds = {shp: d_shp for shp, d_shp in bounds_params.items() if shp in self.gen.params}
         i = 0
-        for shp, d_shp in bounds_params.items():
+        for shp, d_shp in bounds.items():
             for param, d_prm in d_shp.items():
-                x0s[:, i] = random.sample(*bounds_params[shp][param], ntries)
+                x0s[:, i] = np.random.uniform(*bounds[shp][param], ntries)
                 i += 1
 
-        for i in range(x0s.shape[0]):
-            best_fit_params = optimize.minimize(self, x0s[i,:], method=method)['x']
+        best_fit_params = None
+        # check worst value for aic and set gof to that value
+        # check aic equation
+        # save x and fun
+        for i in range(ntries):
+            best_fit_params = optimize.minimize(f, x0s[i, :], method=method)['fun']
 
         self.params.clear()
         self.params.update(prm_mtrx_to_dict(best_fit_params, self.gen.params))
